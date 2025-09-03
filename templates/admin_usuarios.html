@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .user-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .user-card.blocked {
+        border-left-color: #dc3545;
+        opacity: 0.8;
+    }
+    
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .stats-row {
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-top: 4px solid #667eea;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="admin-header text-center">
+        <h1 class="display-4 mb-3">👥 Gerenciar Usuários</h1>
+        <p class="lead mb-0">Controle o acesso de todos os clientes do seu SaaS</p>
+    </div>
+
+    <!-- Navegação -->
+    <div class="mb-4">
+        <nav class="nav nav-pills">
+            <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-arrow-left me-2"></i>Voltar ao Dashboard
+            </a>
+            <a class="nav-link active" href="{{ url_for('admin_usuarios') }}">
+                <i class="fas fa-users me-2"></i>Usuários
+            </a>
+            <a class="nav-link" href="{{ url_for('admin_barbearias') }}">
+                <i class="fas fa-cut me-2"></i>Barbearias
+            </a>
+        </nav>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row stats-row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ usuarios|length }}</div>
+                <div class="text-muted">Total de Usuários</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ usuarios|selectattr('ativo', 'equalto', true)|list|length }}</div>
+                <div class="text-muted">Usuários Ativos</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ usuarios|selectattr('ativo', 'equalto', false)|list|length }}</div>
+                <div class="text-muted">Usuários Bloqueados</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ usuarios|selectattr('tipo', 'equalto', 'admin')|list|length }}</div>
+                <div class="text-muted">Administradores</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Usuários -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Lista de Usuários
+                    </h5>
+                    <div class="input-group" style="width: 300px;">
+                        <input type="text" class="form-control" id="searchUsers" placeholder="Buscar usuários...">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for usuario in usuarios %}
+                    <div class="user-card {% if not usuario.ativo %}blocked{% endif %}" data-user-id="{{ usuario.id }}">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <h6 class="mb-1">{{ usuario.nome }}</h6>
+                                <small class="text-muted">{{ usuario.email }}</small>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-phone me-1"></i>
+                                    {{ usuario.telefone or 'N/A' }}
+                                </small>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="badge {% if usuario.ativo %}bg-success{% else %}bg-danger{% endif %} status-badge">
+                                    {% if usuario.ativo %}
+                                        <i class="fas fa-check-circle me-1"></i>Ativo
+                                    {% else %}
+                                        <i class="fas fa-ban me-1"></i>Bloqueado
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ usuario.created_at.strftime('%d/%m/%Y') }}
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm {% if usuario.ativo %}btn-warning{% else %}btn-success{% endif %}"
+                                            onclick="toggleUserStatus({{ usuario.id }}, {{ usuario.ativo|lower }})">
+                                        {% if usuario.ativo %}
+                                            <i class="fas fa-ban me-1"></i>Bloquear
+                                        {% else %}
+                                            <i class="fas fa-check me-1"></i>Ativar
+                                        {% endif %}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="deleteUser({{ usuario.id }}, '{{ usuario.nome }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Função para alternar status do usuário
+function toggleUserStatus(userId, isActive) {
+    const action = isActive ? 'bloquear' : 'ativar';
+    const confirmMessage = `Tem certeza que deseja ${action} este usuário?`;
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/admin/usuarios/${userId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Recarrega a página para mostrar as mudanças
+                location.reload();
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao processar a solicitação');
+        });
+    }
+}
+
+// Função para deletar usuário
+function deleteUser(userId, userName) {
+    const confirmMessage = `Tem certeza que deseja deletar o usuário "${userName}"?\n\nATENÇÃO: Esta ação não pode ser desfeita e deletará todas as barbearias, profissionais, serviços e agendamentos associados!`;
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/admin/usuarios/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove o card do usuário da interface
+                const userCard = document.querySelector(`[data-user-id="${userId}"]`);
+                if (userCard) {
+                    userCard.remove();
+                }
+                alert('Usuário deletado com sucesso!');
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao processar a solicitação');
+        });
+    }
+}
+
+// Busca de usuários
+document.getElementById('searchUsers').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const userCards = document.querySelectorAll('.user-card');
+    
+    userCards.forEach(card => {
+        const userName = card.querySelector('h6').textContent.toLowerCase();
+        const userEmail = card.querySelector('small').textContent.toLowerCase();
+        
+        if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+

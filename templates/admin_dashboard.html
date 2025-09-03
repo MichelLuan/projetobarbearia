@@ -1,0 +1,88 @@
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Botão para cadastro de usuários
+    document.getElementById('salvarUsuario').addEventListener('click', function() {
+        cadastrarUsuario();
+    });
+});
+
+function cadastrarUsuario() {
+    // Validação dos campos
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const tipo = document.getElementById('tipo').value;
+    const senha = document.getElementById('senha').value;
+    const confirmarSenha = document.getElementById('confirmarSenha').value;
+    const ativo = document.getElementById('ativo').checked;
+
+    // Validações
+    if (!nome || !email || !senha) {
+        showNotification('❌ Erro!', 'Preencha todos os campos obrigatórios', 'danger');
+        return;
+    }
+
+    if (senha !== confirmarSenha) {
+        showNotification('❌ Erro!', 'As senhas não coincidem', 'danger');
+        return;
+    }
+
+    if (senha.length < 6) {
+        showNotification('❌ Erro!', 'A senha deve ter pelo menos 6 caracteres', 'danger');
+        return;
+    }
+
+    // Dados do usuário
+    const userData = {
+        nome: nome,
+        email: email,
+        telefone: telefone || null,
+        tipo: tipo,
+        senha: senha,
+        ativo: ativo
+    };
+
+    // Envia para o servidor
+    fetch('/admin/cadastrar-usuario', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Sucesso!', data.message, 'success');
+            
+            // Limpa o formulário
+            document.getElementById('cadastroForm').reset();
+            
+            // Fecha o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cadastroModal'));
+            modal.hide();
+            
+            // Recarrega a página para mostrar o novo usuário
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            showNotification('❌ Erro!', data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Erro!', 'Erro ao cadastrar usuário', 'danger');
+        console.error('Erro:', error);
+    });
+}
+
+function showNotification(title, message, type = 'info') {
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMessage').textContent = message;
+    
+    const toast = new bootstrap.Toast(document.getElementById('notificationToast'));
+    toast.show();
+}
+</script>
+{% endblock %}

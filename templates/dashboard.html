@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Barbearia App{% endblock %}
+
+{% block content %}
+<!-- Cabeçalho do Dashboard -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Bem-vindo de volta, {{ current_user.nome }}!</p>
+    </div>
+    <div>
+        <a href="{{ url_for('nova_barbearia') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nova Barbearia
+        </a>
+    </div>
+</div>
+
+<!-- Cards de Estatísticas -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-store fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="card-title text-muted mb-1">Barbearias</h6>
+                        <h3 class="mb-0">{{ current_user.barbearias|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-users fa-2x text-success"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="card-title text-muted mb-1">Profissionais</h6>
+                        <h3 class="mb-0">
+                            {% set total_profissionais = 0 %}
+                            {% for barbearia in current_user.barbearias %}
+                                {% set total_profissionais = total_profissionais + barbearia.profissionais|length %}
+                            {% endfor %}
+                            {{ total_profissionais }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-scissors fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="card-title text-muted mb-1">Serviços</h6>
+                        <h3 class="mb-0">
+                            {% set total_servicos = 0 %}
+                            {% for barbearia in current_user.barbearias %}
+                                {% set total_servicos = total_servicos + barbearia.servicos|length %}
+                            {% endfor %}
+                            {{ total_servicos }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-calendar-check fa-2x text-info"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="card-title text-muted mb-1">Agendamentos Hoje</h6>
+                        <h3 class="mb-0">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Acesso Rápido -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <h3 class="h4 mb-4">Acesso Rápido</h3>
+    </div>
+    
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-store fa-2x text-primary"></i>
+                </div>
+                <h5 class="card-title">Gerenciar Barbearias</h5>
+                <p class="card-text text-muted">
+                    Visualize e gerencie todas as suas barbearias cadastradas no sistema.
+                </p>
+                <a href="{{ url_for('minhas_barbearias') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-right me-2"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-users fa-2x text-success"></i>
+                </div>
+                <h5 class="card-title">Profissionais</h5>
+                <p class="card-text text-muted">
+                    Cadastre e gerencie os profissionais que trabalham nas suas barbearias.
+                </p>
+                <a href="#" class="btn btn-outline-success" onclick="alert('Selecione uma barbearia primeiro')">
+                    <i class="fas fa-arrow-right me-2"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-scissors fa-2x text-warning"></i>
+                </div>
+                <h5 class="card-title">Serviços</h5>
+                <p class="card-text text-muted">
+                    Configure os serviços oferecidos com preços e durações específicas.
+                </p>
+                <a href="#" class="btn btn-outline-warning" onclick="alert('Selecione uma barbearia primeiro')">
+                    <i class="fas fa-arrow-right me-2"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Barbearias Recentes -->
+<div class="row g-4">
+    <div class="col-12">
+        <h3 class="h4 mb-4">Suas Barbearias</h3>
+    </div>
+    
+    {% if current_user.barbearias %}
+        {% for barbearia in current_user.barbearias %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">{{ barbearia.nome }}</h5>
+                        <span class="badge bg-{{ 'success' if barbearia.ativo else 'secondary' }}">
+                            {{ 'Ativa' if barbearia.ativo else 'Inativa' }}
+                        </span>
+                    </div>
+                    
+                    <p class="card-text text-muted mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        {{ barbearia.endereco or 'Endereço não informado' }}
+                    </p>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Profissionais</small>
+                            <div class="fw-bold">{{ barbearia.profissionais|length }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Serviços</small>
+                            <div class="fw-bold">{{ barbearia.servicos|length }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('gerenciar_profissionais', barbearia_id=barbearia.id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-users me-2"></i>Profissionais
+                        </a>
+                        <a href="{{ url_for('gerenciar_servicos', barbearia_id=barbearia.id) }}" 
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-scissors me-2"></i>Serviços
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhuma barbearia cadastrada</h5>
+                <p class="text-muted">Comece criando sua primeira barbearia para usar o sistema.</p>
+                <a href="{{ url_for('nova_barbearia') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Criar Primeira Barbearia
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Seção de Atividades Recentes -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Atividades Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Nenhuma atividade recente para exibir.</p>
+                    <small class="text-muted">As atividades do sistema aparecerão aqui.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.bg-opacity-10 {
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+}
+
+.bg-warning.bg-opacity-10 {
+    background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+}
+
+.bg-info.bg-opacity-10 {
+    background-color: rgba(var(--bs-info-rgb), 0.1) !important;
+}
+</style>
+{% endblock %}
+
+
+
+
+
